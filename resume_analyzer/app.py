@@ -46,13 +46,15 @@ def create_app():
 
     return app
 
-if __name__ == "__main__":
-    # Initialize Database
-    print("Initializing SQLite Database...")
+# Initialize the Flask application globally for WSGI servers like Gunicorn
+app = create_app()
+
+# Initialize Database tables dynamically (important for Railway/Docker environments)
+with app.app_context():
     create_tables()
-    
-    # Create and Run App
-    app = create_app()
+
+if __name__ == "__main__":
     print("\n🚀 Smart AI Resume Analyzer is starting...")
-    print("URL: http://127.0.0.1:5000")
-    app.run(debug=True, port=5000)
+    # Bind to 0.0.0.0 and dynamically assign the PORT variable provided by Railway
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
