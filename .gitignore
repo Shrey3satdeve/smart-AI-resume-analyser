@@ -10,5 +10,6 @@ ENV/
 *.log
 
 # Ignore data containing dummy resumes or model weights if applicable
-resume_analyzer/data/*.docx
-resume_analyzer/ml_models/*.pkl
+data/*.docx
+ml_models/*.pkl
+data/resumes.csv
