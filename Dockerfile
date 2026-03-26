@@ -31,4 +31,5 @@ EXPOSE 5000
 
 # Start command (Procfile is ignored when Dockerfile is present on some platforms,
 # but we can call it directly or use gunicorn here)
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+# Use shell form to allow environment variable expansion for $PORT
+CMD gunicorn --bind 0.0.0.0:$PORT app:app
