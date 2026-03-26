@@ -8,14 +8,14 @@ and defines custom template filters for handling JSON-serialized lists.
 
 import os
 import json
-from flask import Flask, render_template
-from config import UPLOAD_FOLDER, SECRET_KEY
-from database.db import create_tables
+from flask import Flask, render_template  # type: ignore
+from config import UPLOAD_FOLDER, SECRET_KEY  # type: ignore
+from database.db import create_tables  # type: ignore
 
 # Import Blueprints
-from routes.upload import upload_bp
-from routes.analyze import analyze_bp
-from routes.dashboard import dashboard_bp
+from routes.upload import upload_bp  # type: ignore
+from routes.analyze import analyze_bp  # type: ignore
+from routes.dashboard import dashboard_bp  # type: ignore
 
 def create_app():
     app = Flask(__name__)
