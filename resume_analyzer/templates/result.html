@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="margin-bottom: 3rem;">
+    <a href="{{ url_for('upload.ranking') }}" style="color: var(--text-dim); text-decoration: none; font-size: 0.9rem;">&larr; Back to Results</a>
+    <h1 style="margin-top: 1rem;">Candidate Analysis: {{ candidate.name }}</h1>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+    <!-- LEFT COLUMN -->
+    <div>
+        <div class="glass card" style="text-align: center; margin-bottom: 2rem;">
+            <p style="color: var(--text-dim); margin-bottom: 1rem; text-transform: uppercase; font-size: 0.8rem;">Overall ATS Score</p>
+            <div class="score-circle {% if candidate.ats_score > 70 %}border-success{% elif candidate.ats_score > 40 %}border-warning{% else %}border-danger{% endif %}">
+                {{ candidate.ats_score }}
+            </div>
+            <p style="font-weight: 600;">Category: {{ candidate.prediction }}</p>
+        </div>
+
+        <div class="glass card" style="margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 1rem;">Contact Info</h3>
+            <p style="margin-bottom: 0.5rem;">📧 {{ candidate.email or 'N/A' }}</p>
+            <p>📱 {{ candidate.phone or 'N/A' }}</p>
+        </div>
+
+        <div class="glass card">
+            <h3 style="margin-bottom: 1rem;">Job Match (%)</h3>
+            <div style="width: 100%; background: rgba(255,255,255,0.1); border-radius: 1rem; height: 12px; margin-bottom: 0.5rem;">
+                <div class="match-bar" data-score="{{ candidate.match_score }}" style="background: var(--primary); height: 12px; border-radius: 1rem; box-shadow: 0 0 10px var(--primary-glow); width: 0%; transition: width 1s ease-in-out;"></div>
+            </div>
+            <p style="font-weight: 800; text-align: right; color: var(--primary);">{{ candidate.match_score }}% Match</p>
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+        <!-- Recommendations -->
+        <div class="glass card" style="margin-bottom: 2rem; border-left: 4px solid var(--accent);">
+            <h3 style="margin-bottom: 1.5rem; color: var(--accent);">AI Recommendations</h3>
+            <ul style="list-style: none;">
+                {% for rec in (candidate.recommendations|from_json) %}
+                <li style="margin-bottom: 1rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 0.5rem;">{{ rec }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Missing Skills -->
+        <div class="glass card" style="margin-bottom: 2rem; position: relative; overflow: hidden; border: 1px solid rgba(248, 113, 113, 0.2);">
+            <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(248, 113, 113, 0.15) 0%, transparent 70%); border-radius: 50%; filter: blur(20px); pointer-events: none;"></div>
+            <h3 style="margin-bottom: 1rem; color: #fca5a5; display: flex; align-items: center; gap: 0.5rem;"><span style="font-size:1.2rem;">⚠️</span> Missing Required Skills</h3>
+            <p style="color: var(--text-dim); margin-bottom: 1.5rem; font-size: 0.85rem;">Detected in job description but not in resume:</p>
+            <div class="tag-cloud">
+                {% for skill in (candidate.missing_skills|from_json) %}
+                <span class="tag missing">{{ skill }}</span>
+                {% endfor %}
+                {% if not (candidate.missing_skills|from_json) %}
+                <div style="background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.3); padding: 1rem; border-radius: 0.5rem; width: 100%; display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--success); font-weight: 800; font-size: 1.2rem;">✓</span>
+                    <p style="color: var(--success); font-weight: 600; margin: 0;">None found – Great alignment!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Extracted Skills -->
+        <div class="glass card" style="margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 1rem;">Extracted Skills</h3>
+            <div class="tag-cloud">
+                {% for skill in (candidate.skills|from_json) %}
+                <span class="tag">{{ skill }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Experience & Education -->
+        <div class="glass card">
+            <h3 style="margin-bottom: 1rem;">Parsing Highlights</h3>
+            <div style="font-size: 0.9rem;">
+                <p style="font-weight: 600; margin-bottom: 0.5rem;">Education Snippet:</p>
+                <ul style="margin-bottom: 1.5rem; padding-left: 1.5rem; color: var(--text-dim);">
+                    {% for item in (candidate.education|from_json)[:3] %} <li>{{ item }}</li> {% endfor %}
+                </ul>
+                
+                <p style="font-weight: 600; margin-bottom: 0.5rem;">Experience Snippet:</p>
+                <ul style="padding-left: 1.5rem; color: var(--text-dim);">
+                    {% for item in (candidate.experience|from_json)[:3] %} <li>{{ item }}</li> {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Dynamically set widths to avoid IDE CSS linter errors with Jinja tags
+    document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(() => {
+            document.querySelectorAll('.match-bar').forEach(el => {
+                el.style.width = el.getAttribute('data-score') + '%';
+            });
+        }, 100);
+    });
+</script>
+{% endblock %}

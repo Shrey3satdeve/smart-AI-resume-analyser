@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="margin-bottom: 3rem;">
+    <h1 style="margin-bottom: 0.5rem;">Resume Ranking Results</h1>
+    <p style="color: var(--text-dim);">Top candidates matched against your job description.</p>
+</div>
+
+{% if candidates %}
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2rem;">
+    {% for candidate in candidates %}
+    {% set border_color = 'var(--success)' if loop.first else 'var(--primary)' %}
+    {% set card_attr = 'style="border-top: 4px solid ' ~ border_color ~ '; transition: 0.3s; position: relative;"' %}
+    <div class="glass card animate" {{ card_attr | safe }}>
+        {% if loop.first %}
+        <div style="position: absolute; top: -15px; right: 20px; background: var(--success); color: white; padding: 0.25rem 1rem; border-radius: 2rem; font-weight: 800; font-size: 0.8rem; box-shadow: 0 4px 12px rgba(52, 211, 153, 0.4);">
+            TOP MATCH
+        </div>
+        {% endif %}
+
+        <h2 style="margin-bottom: 0.5rem;">{{ candidate.name }}</h2>
+        <p style="color: var(--text-dim); margin-bottom: 1.5rem;">{{ candidate.prediction }}</p>
+
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; text-align: center;">
+            <div>
+                <p style="color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase;">Job Match</p>
+                <p style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">{{ candidate.match_score }}%</p>
+            </div>
+            <div>
+                <p style="color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase;">ATS Score</p>
+                <p style="font-size: 1.5rem; font-weight: 800; color: var(--secondary);">{{ candidate.ats_score }}</p>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <p style="font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem;">Extracted Skills:</p>
+            <div class="tag-cloud">
+                {% for skill in (candidate.skills|from_json)[:5] %}
+                <span class="tag">{{ skill }}</span>
+                {% endfor %}
+                {% if (candidate.skills|from_json)|length > 5 %}
+                <span class="tag">+{{ (candidate.skills|from_json)|length - 5 }} more</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <a href="{{ url_for('analyze.view_result', candidate_id=candidate.id) }}" style="display: block; text-align: center; color: var(--primary); text-decoration: none; font-weight: 600; padding: 0.75rem; border: 1px solid var(--primary); border-radius: 0.5rem; transition: 0.3s;">
+            View Detailed Analysis
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="glass card" style="text-align: center; padding: 4rem;">
+    <p>No resumes analyzed in this session.</p>
+    <a href="{{ url_for('upload.index') }}" style="color: var(--primary);">Go back to upload</a>
+</div>
+{% endif %}
+{% endblock %}

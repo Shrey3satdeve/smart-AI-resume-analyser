@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="margin-bottom: 3rem; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h1>Candidate Dashboard</h1>
+        <p style="color: var(--text-dim);">Historical analysis logs and candidate ranking.</p>
+    </div>
+    
+    <div class="glass" style="padding: 0.5rem 1rem;">
+        <form action="{{ url_for('dashboard.view_dashboard') }}" method="GET">
+            <select name="category" onchange="this.form.submit()" style="background: transparent; color: white; border: none; outline: none; padding: 0.5rem;">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat }}" {% if request.args.get('category') == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+</div>
+
+<div class="glass card" style="padding: 0;">
+    <table>
+        <thead>
+            <tr>
+                <th>Candidate Name</th>
+                <th>Category</th>
+                <th>ATS Score</th>
+                <th>Match %</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for candidate in candidates %}
+            <tr>
+                <td style="font-weight: 600;">{{ candidate.name }}</td>
+                <td>{{ candidate.prediction }}</td>
+                <td>
+                    {% set score_color = 'var(--success)' if candidate.ats_score > 70 else ('var(--warning)' if candidate.ats_score > 40 else 'var(--danger)') %}
+                    {% set style_attr = 'style="color: ' ~ score_color ~ '; font-weight: 800;"' %}
+                    <span {{ style_attr | safe }}>
+                        {{ candidate.ats_score }}
+                    </span>
+                </td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="flex-grow: 1; background: rgba(255,255,255,0.1); height: 6px; border-radius: 4px;">
+                            {% set bar_style_attr = 'style="width: ' ~ candidate.match_score ~ '%; background: var(--primary); height: 100%; border-radius: 4px;"' %}
+                            <div {{ bar_style_attr | safe }}></div>
+                        </div>
+                        <span style="font-size: 0.8rem;">{{ candidate.match_score }}%</span>
+                    </div>
+                </td>
+                <td>
+                    <a href="{{ url_for('analyze.view_result', candidate_id=candidate.id) }}" style="color: var(--primary); text-decoration: none; font-size: 0.9rem;">View Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if not candidates %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-dim);">No candidates found. Start by uploading resumes!</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

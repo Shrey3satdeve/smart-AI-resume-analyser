@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart AI Resume Analyzer{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="glass">
+        <div class="logo">AI Resume Prof</div>
+        <div class="nav-links">
+            <a href="{{ url_for('upload.index') }}">Analyze</a>
+            <a href="{{ url_for('dashboard.view_dashboard') }}">Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container animate">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="glass card" style="padding: 1rem; margin-bottom: 1rem; border-color: var(--primary);">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer style="text-align: center; padding: 2rem; color: var(--text-dim); font-size: 0.9rem;">
+        &copy; 2026 Smart AI Resume Analyzer – Built with Flask & NLP
+    </footer>
+</body>
+</html>

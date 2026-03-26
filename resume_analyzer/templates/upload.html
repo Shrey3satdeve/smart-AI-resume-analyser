@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero">
+    <h1>Supercharge Your Hiring with <br><span style="color: var(--primary);">AI Resume Analysis</span></h1>
+    <p style="color: var(--text-dim); font-size: 1.2rem; max-width: 700px; margin: 0 auto 3rem;">
+        Upload multiple resumes, provide a job description, and get instant ATS scores, semantic matching, and actionable suggestions.
+    </p>
+
+    <div class="glass card" style="max-width: 800px; margin: 0 auto; text-align: left;">
+        <form action="{{ url_for('upload.index') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
+            <div style="margin-bottom: 2rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Job Description (Target Role)</label>
+                <textarea name="job_description" rows="6" placeholder="Paste the job description here to match resumes against specific requirements..." required></textarea>
+            </div>
+
+            <div class="upload-zone" id="dropZone" style="border: 2px dashed var(--primary); padding: 4rem 2rem; text-align: center; cursor: pointer; border-radius: 1rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: rgba(15,23,42,0.4); position: relative; overflow: hidden;">
+                <div style="font-size: 3.5rem; margin-bottom: 1rem; text-shadow: 0 0 20px rgba(56,189,248,0.4);">📄</div>
+                <p style="font-weight: 600; font-size: 1.25rem;">Click to upload or drag & drop</p>
+                <p style="color: var(--text-dim); font-size: 0.95rem; margin-top: 0.5rem;">Supports multiple PDF & DOCX files</p>
+                <input type="file" name="resumes" id="fileInput" multiple style="display: none;" accept=".pdf,.docx">
+            </div>
+
+            <div id="fileList" style="margin-bottom: 2rem;"></div>
+
+            <button type="submit" id="analyzeBtn" style="font-size: 1.1rem; padding: 1.2rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);">
+                ✨ Analyze Resumes
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+
+    dropZone.onclick = () => fileInput.click();
+
+    dropZone.ondragover = (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--accent)';
+        dropZone.style.background = 'rgba(244, 114, 182, 0.05)';
+        dropZone.style.transform = 'scale(1.02)';
+    };
+
+    dropZone.ondragleave = (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--primary)';
+        dropZone.style.background = 'rgba(15,23,42,0.4)';
+        dropZone.style.transform = 'scale(1)';
+    };
+
+    dropZone.ondrop = (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--primary)';
+        dropZone.style.background = 'rgba(15,23,42,0.4)';
+        dropZone.style.transform = 'scale(1)';
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            updateFileList(fileInput.files);
+        }
+    };
+
+    fileInput.onchange = (e) => {
+        updateFileList(e.target.files);
+    };
+
+    function updateFileList(files) {
+        if (files.length === 0) {
+            fileList.innerHTML = '';
+            return;
+        }
+        let html = `<div class="glass" style="padding: 1.5rem; background: rgba(56, 189, 248, 0.05); border: 1px solid rgba(56, 189, 248, 0.2);"><p style="font-weight: 600; margin-bottom: 0.8rem; color: var(--primary);">Selected ${files.length} file(s):</p><ul style="list-style-type: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem;">`;
+        Array.from(files).forEach(f => {
+            html += `<li style="font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem;"><span style="color: var(--success);">✔</span> ${f.name}</li>`;
+        });
+        html += `</ul></div>`;
+        fileList.innerHTML = html;
+    }
+
+    document.getElementById('uploadForm').onsubmit = (e) => {
+        if (fileInput.files.length === 0) {
+            e.preventDefault();
+            alert("⚠️ Please select at least one resume to upload.");
+            return false;
+        }
+        analyzeBtn.innerHTML = `Analyzing... <span style="display:inline-block; animation: spin 1s linear infinite;">⏳</span>`;
+        analyzeBtn.disabled = true;
+        analyzeBtn.style.opacity = '0.7';
+    };
+</script>
+<style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+</style>
+{% endblock %}
